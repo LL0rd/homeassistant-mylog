@@ -1,0 +1,155 @@
+send_log:
+  name: Send Log Entry
+  description: Send a log entry to MyLog
+  fields:
+    title:
+      name: Title
+      description: Log entry title (max 500 characters)
+      required: false
+      example: "Home Assistant Event"
+      selector:
+        text:
+    content:
+      name: Content
+      description: Log entry content/message
+      required: false
+      example: "Motion detected in living room"
+      selector:
+        text:
+          multiline: true
+    type_name:
+      name: Log Type
+      description: Name of the log type (must exist in user's mylog)
+      required: false
+      example: "Home Assistant"
+      selector:
+        text:
+    type_id:
+      name: Log Type ID
+      description: ID of the log type (alternative to type_name)
+      required: false
+      example: 1
+      selector:
+        number:
+          min: 1
+          mode: box
+    severity:
+      name: Severity
+      description: Severity level
+      required: false
+      default: "info"
+      selector:
+        select:
+          options:
+            - "info"
+            - "low"
+            - "medium"
+            - "high"
+            - "critical"
+    priority:
+      name: Priority
+      description: Priority (0-100)
+      required: false
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 100
+    status:
+      name: Status
+      description: Entry status
+      required: false
+      default: "active"
+      selector:
+        select:
+          options:
+            - "draft"
+            - "active"
+            - "archived"
+    tags:
+      name: Tags
+      description: List of tags
+      required: false
+      example: ["automation", "motion"]
+      selector:
+        object:
+    location_name:
+      name: Location
+      description: Location name
+      required: false
+      example: "Living Room"
+      selector:
+        text:
+    location_lat:
+      name: Latitude
+      description: Location latitude (-90 to 90)
+      required: false
+      selector:
+        number:
+          min: -90
+          max: 90
+          step: 0.000001
+          mode: box
+    location_lng:
+      name: Longitude
+      description: Location longitude (-180 to 180)
+      required: false
+      selector:
+        number:
+          min: -180
+          max: 180
+          step: 0.000001
+          mode: box
+    occurred_at:
+      name: Occurred At
+      description: When the event occurred (ISO 8601 datetime)
+      required: false
+      example: "2025-01-16T12:00:00"
+      selector:
+        text:
+    is_favourite:
+      name: Favourite
+      description: Mark as favourite
+      required: false
+      default: false
+      selector:
+        boolean:
+    is_starred:
+      name: Starred
+      description: Mark as starred
+      required: false
+      default: false
+      selector:
+        boolean:
+    is_pinned:
+      name: Pinned
+      description: Mark as pinned
+      required: false
+      default: false
+      selector:
+        boolean:
+    is_public:
+      name: Public
+      description: Make entry public
+      required: false
+      default: false
+      selector:
+        boolean:
+    external_ref_id:
+      name: External Reference ID
+      description: External reference identifier (max 255 chars)
+      required: false
+      selector:
+        text:
+
+send_batch:
+  name: Send Batch Log Entries
+  description: Send multiple log entries to MyLog in a single request (max 100)
+  fields:
+    entries:
+      name: Entries
+      description: List of log entry objects
+      required: true
+      example: '[{"title": "Entry 1", "content": "Content 1"}, {"title": "Entry 2", "content": "Content 2"}]'
+      selector:
+        object:

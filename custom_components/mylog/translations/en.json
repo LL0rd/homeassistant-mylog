@@ -1,0 +1,22 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to MyLog",
+        "description": "Enter your MyLog API key. You can create one at {mylog_url} under Settings → API Keys.",
+        "data": {
+          "api_key": "API Key"
+        }
+      }
+    },
+    "error": {
+      "invalid_api_key_format": "Invalid API key format. Key must start with 'mlk_'",
+      "invalid_auth": "Invalid API key. Please check your key and try again.",
+      "cannot_connect": "Cannot connect to MyLog. Please check your internet connection.",
+      "unknown": "An unexpected error occurred."
+    },
+    "abort": {
+      "already_configured": "MyLog is already configured with this API key."
+    }
+  }
+}

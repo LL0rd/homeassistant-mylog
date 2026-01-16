@@ -1,0 +1,22 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Mit MyLog verbinden",
+        "description": "Geben Sie Ihren MyLog API-Schlüssel ein. Sie können einen unter {mylog_url} in Einstellungen → API-Schlüssel erstellen.",
+        "data": {
+          "api_key": "API-Schlüssel"
+        }
+      }
+    },
+    "error": {
+      "invalid_api_key_format": "Ungültiges API-Schlüssel-Format. Der Schlüssel muss mit 'mlk_' beginnen.",
+      "invalid_auth": "Ungültiger API-Schlüssel. Bitte überprüfen Sie Ihren Schlüssel und versuchen Sie es erneut.",
+      "cannot_connect": "Verbindung zu MyLog nicht möglich. Bitte überprüfen Sie Ihre Internetverbindung.",
+      "unknown": "Ein unerwarteter Fehler ist aufgetreten."
+    },
+    "abort": {
+      "already_configured": "MyLog ist bereits mit diesem API-Schlüssel konfiguriert."
+    }
+  }
+}
