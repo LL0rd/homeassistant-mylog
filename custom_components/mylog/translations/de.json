@@ -18,5 +18,31 @@
     "abort": {
       "already_configured": "MyLog ist bereits mit diesem API-Schlüssel konfiguriert."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "MyLog Optionen",
+        "menu_options": {
+          "test_message": "Testnachricht senden"
+        }
+      },
+      "test_message": {
+        "title": "Testnachricht senden",
+        "description": "Senden Sie eine Testnachricht an MyLog, um die Verbindung zu überprüfen.",
+        "data": {
+          "title": "Titel",
+          "content": "Inhalt"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ungültiger API-Schlüssel. Bitte überprüfen Sie Ihren Schlüssel und versuchen Sie es erneut.",
+      "cannot_connect": "Verbindung zu MyLog nicht möglich. Bitte überprüfen Sie Ihre Internetverbindung.",
+      "unknown": "Ein unerwarteter Fehler ist aufgetreten."
+    },
+    "abort": {
+      "test_message_sent": "Testnachricht erfolgreich gesendet! Überprüfen Sie Ihr MyLog."
+    }
   }
 }

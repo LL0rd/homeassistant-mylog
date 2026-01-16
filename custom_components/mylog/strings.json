@@ -18,5 +18,31 @@
     "abort": {
       "already_configured": "MyLog is already configured with this API key."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "MyLog Options",
+        "menu_options": {
+          "test_message": "Send Test Message"
+        }
+      },
+      "test_message": {
+        "title": "Send Test Message",
+        "description": "Send a test message to MyLog to verify the connection.",
+        "data": {
+          "title": "Title",
+          "content": "Content"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid API key. Please check your key and try again.",
+      "cannot_connect": "Cannot connect to MyLog. Please check your internet connection.",
+      "unknown": "An unexpected error occurred."
+    },
+    "abort": {
+      "test_message_sent": "Test message sent successfully! Check your MyLog."
+    }
   }
 }

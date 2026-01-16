@@ -1,5 +1,9 @@
 # MyLog Home Assistant Integration
 
+<p align="center">
+  <img src="images/logo.svg" alt="MyLog Logo" width="200">
+</p>
+
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![GitHub Release](https://img.shields.io/github/release/LL0rd/homeassistant-mylog.svg)](https://github.com/LL0rd/homeassistant-mylog/releases)
 [![License](https://img.shields.io/github/license/LL0rd/homeassistant-mylog.svg)](LICENSE)
