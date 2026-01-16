@@ -70,15 +70,11 @@ class MyLogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> MyLogOptionsFlowHandler:
         """Get the options flow for this handler."""
-        return MyLogOptionsFlowHandler(config_entry)
+        return MyLogOptionsFlowHandler()
 
 
 class MyLogOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle MyLog options."""
-
-    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Initialize options flow."""
-        self.config_entry = config_entry
 
     async def async_step_init(self, user_input: dict | None = None) -> FlowResult:
         """Handle sending a test message."""
