@@ -81,15 +81,6 @@ class MyLogOptionsFlowHandler(config_entries.OptionsFlow):
         self.config_entry = config_entry
 
     async def async_step_init(self, user_input: dict | None = None) -> FlowResult:
-        """Manage the options."""
-        return self.async_show_menu(
-            step_id="init",
-            menu_options=["test_message"],
-        )
-
-    async def async_step_test_message(
-        self, user_input: dict | None = None
-    ) -> FlowResult:
         """Handle sending a test message."""
         errors: dict[str, str] = {}
 
@@ -113,7 +104,7 @@ class MyLogOptionsFlowHandler(config_entries.OptionsFlow):
                 await api.close()
 
         return self.async_show_form(
-            step_id="test_message",
+            step_id="init",
             data_schema=vol.Schema(
                 {
                     vol.Optional("title", default="Test from Home Assistant"): str,
