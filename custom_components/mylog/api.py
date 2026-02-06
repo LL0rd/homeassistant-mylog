@@ -4,8 +4,9 @@ from __future__ import annotations
 import aiohttp
 from typing import Any
 
-# Fixed API URL - mylog.zip is the only instance
-API_BASE_URL = "https://mylog.zip/fastAPI"
+# Fixed API URLs - mylog.zip is the only instance
+RUST_API_URL = "https://mylog.zip/fastAPI"
+NUXT_API_URL = "https://mylog.zip/api"
 
 
 class MyLogApiError(Exception):
@@ -31,7 +32,8 @@ class MyLogApi:
 
     def __init__(self, api_key: str) -> None:
         """Initialize the API client."""
-        self._api_url = API_BASE_URL
+        self._rust_api_url = RUST_API_URL
+        self._nuxt_api_url = NUXT_API_URL
         self._api_key = api_key
         self._session: aiohttp.ClientSession | None = None
 
@@ -59,7 +61,7 @@ class MyLogApi:
         session = await self._get_session()
         try:
             async with session.get(
-                f"{self._api_url}/health",
+                f"{self._rust_api_url}/health",
                 timeout=aiohttp.ClientTimeout(total=10),
             ) as response:
                 if response.status != 200:
@@ -118,7 +120,7 @@ class MyLogApi:
         session = await self._get_session()
         try:
             async with session.post(
-                f"{self._api_url}/api/v1/logs",
+                f"{self._rust_api_url}/api/v1/logs",
                 json=payload,
                 headers=self._headers,
                 timeout=aiohttp.ClientTimeout(total=30),
@@ -143,7 +145,7 @@ class MyLogApi:
         session = await self._get_session()
         try:
             async with session.post(
-                f"{self._api_url}/api/v1/logs/batch",
+                f"{self._rust_api_url}/api/v1/logs/batch",
                 json=entries,
                 headers=self._headers,
                 timeout=aiohttp.ClientTimeout(total=60),
@@ -160,3 +162,45 @@ class MyLogApi:
                 return data
         except aiohttp.ClientError as err:
             raise MyLogConnectionError(f"Connection failed: {err}") from err
+
+    async def _nuxt_get(self, path: str, params: dict | None = None) -> Any:
+        """Make a GET request to the Nuxt Web API."""
+        session = await self._get_session()
+        try:
+            async with session.get(
+                f"{self._nuxt_api_url}{path}",
+                params=params,
+                headers=self._headers,
+                timeout=aiohttp.ClientTimeout(total=15),
+            ) as response:
+                if response.status == 401:
+                    raise MyLogAuthError("Authentication failed")
+                if response.status >= 400:
+                    raise MyLogApiError(f"API error: {response.status}")
+                return await response.json()
+        except aiohttp.ClientError as err:
+            raise MyLogConnectionError(f"Connection failed: {err}") from err
+
+    async def get_stats(self) -> dict[str, Any]:
+        """Get dashboard statistics via the Nuxt API."""
+        return await self._nuxt_get("/dashboard/stats")
+
+    async def get_recent_entries(self, per_page: int = 5) -> dict[str, Any]:
+        """Get recent log entries via the Nuxt API."""
+        return await self._nuxt_get(
+            "/logs",
+            params={
+                "perPage": per_page,
+                "sortBy": "effectiveDate",
+                "sortDesc": "true",
+            },
+        )
+
+    async def get_log_types(self) -> list[dict[str, Any]]:
+        """Get available log types via the Nuxt API."""
+        return await self._nuxt_get("/log-types")
+
+    async def get_tags(self) -> list[str]:
+        """Get user's tags via the Nuxt API."""
+        data = await self._nuxt_get("/tags")
+        return data.get("tags", [])

@@ -16,6 +16,9 @@ A Home Assistant integration for [MyLog](https://mylog.zip) - send log entries d
 - Send log entries via Home Assistant services
 - Support for all MyLog entry fields (title, content, severity, tags, location, etc.)
 - Batch logging support for multiple entries
+- **Dashboard sensors** - Total entries, monthly entries, storage usage
+- **Recent entries sensor** - Display the latest log entries on your dashboard
+- Send test messages directly from the integration settings
 - English and German translations
 
 ## Installation
@@ -76,6 +79,58 @@ Send multiple log entries in a single request (max 100 entries).
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `entries` | list | Yes | List of log entry objects |
+
+## Sensors
+
+After setup, the integration creates the following sensors:
+
+| Sensor | Entity ID | Description |
+|--------|-----------|-------------|
+| Total Entries | `sensor.mylog_total_entries` | Total number of log entries |
+| Entries This Month | `sensor.mylog_entries_this_month` | Entries created this month |
+| Storage Used | `sensor.mylog_storage_used` | Storage used in MB |
+| Recent Entries | `sensor.mylog_recent_entries` | Last 10 entries with details in attributes |
+
+Sensors update every 5 minutes.
+
+## Dashboard
+
+You can display your recent MyLog entries on a Home Assistant dashboard using the **Recent Entries** sensor.
+
+### Markdown Card (Recent Entries)
+
+Add a **Markdown** card with this template to show your latest log entries:
+
+```yaml
+type: markdown
+title: MyLog Recent Entries
+content: >-
+  {% set entries = state_attr('sensor.mylog_recent_entries', 'entries') %}
+  {% if entries %}
+    {% for entry in entries[:5] %}
+  **{{ entry.title or 'Untitled' }}** {% if entry.severity != 'info' %}({{ entry.severity }}){% endif %}
+
+  {{ entry.content[:200] }}{% if entry.content | length > 200 %}...{% endif %}
+
+  *{{ entry.type }}* - {{ entry.created_at[:10] }}
+
+  ---
+    {% endfor %}
+  {% else %}
+  No entries found.
+  {% endif %}
+```
+
+### Entity Cards (Stats Overview)
+
+```yaml
+type: entities
+title: MyLog Statistics
+entities:
+  - entity: sensor.mylog_total_entries
+  - entity: sensor.mylog_entries_this_month
+  - entity: sensor.mylog_storage_used
+```
 
 ## Example Automations
 

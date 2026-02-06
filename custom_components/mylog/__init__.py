@@ -13,8 +13,11 @@ from homeassistant.helpers import config_validation as cv
 
 from .api import MyLogApi, MyLogConnectionError, MyLogApiError
 from .const import DOMAIN
+from .coordinator import MyLogCoordinator
 
 _LOGGER = logging.getLogger(__name__)
+
+PLATFORMS = ["sensor"]
 
 SERVICE_SEND_LOG = "send_log"
 SERVICE_SEND_BATCH = "send_batch"
@@ -62,8 +65,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await api.close()
         raise ConfigEntryNotReady(f"Cannot connect to MyLog: {err}") from err
 
+    coordinator = MyLogCoordinator(hass, api)
+    await coordinator.async_config_entry_first_refresh()
+
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = api
+    hass.data[DOMAIN][entry.entry_id] = {
+        "api": api,
+        "coordinator": coordinator,
+    }
 
     async def handle_send_log(call: ServiceCall) -> None:
         """Handle send_log service call."""
@@ -113,17 +122,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         DOMAIN, SERVICE_SEND_BATCH, handle_send_batch, schema=SERVICE_SEND_BATCH_SCHEMA
     )
 
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    api: MyLogApi = hass.data[DOMAIN].pop(entry.entry_id)
-    await api.close()
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
-    # Remove services if no more entries
-    if not hass.data[DOMAIN]:
-        hass.services.async_remove(DOMAIN, SERVICE_SEND_LOG)
-        hass.services.async_remove(DOMAIN, SERVICE_SEND_BATCH)
+    if unload_ok:
+        entry_data = hass.data[DOMAIN].pop(entry.entry_id)
+        await entry_data["api"].close()
 
-    return True
+        # Remove services if no more entries
+        if not hass.data[DOMAIN]:
+            hass.services.async_remove(DOMAIN, SERVICE_SEND_LOG)
+            hass.services.async_remove(DOMAIN, SERVICE_SEND_BATCH)
+
+    return unload_ok
