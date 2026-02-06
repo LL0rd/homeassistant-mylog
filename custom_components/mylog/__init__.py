@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import logging
+import shutil
+from pathlib import Path
 from typing import Any
 
 import voluptuous as vol
@@ -126,7 +128,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
+    # Copy logo to www folder for dashboard use
+    await hass.async_add_executor_job(_copy_logo, hass.config.path("www"))
+
     return True
+
+
+def _copy_logo(www_path: str) -> None:
+    """Copy logo to HA www folder for dashboard cards."""
+    www_dir = Path(www_path)
+    www_dir.mkdir(exist_ok=True)
+    dest = www_dir / "mylog-logo.svg"
+    if not dest.exists():
+        src = Path(__file__).parent / "icon.svg"
+        if src.exists():
+            shutil.copy2(src, dest)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

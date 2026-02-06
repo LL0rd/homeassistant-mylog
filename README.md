@@ -103,20 +103,24 @@ Add a **Markdown** card with this template to show your latest log entries:
 
 ```yaml
 type: markdown
-title: MyLog Recent Entries
-content: >-
-  {% set entries = state_attr('sensor.mylog_recent_entries', 'entries') %}
-  {% if entries %}
-    {% for entry in entries[:5] %}
-  **{{ entry.title or 'Untitled' }}** {% if entry.severity != 'info' %}({{ entry.severity }}){% endif %}
-
-  {{ entry.content[:200] }}{% if entry.content | length > 200 %}...{% endif %}
-
-  *{{ entry.type }}* - {{ entry.created_at[:10] }}
-
-  ---
-    {% endfor %}
-  {% else %}
+title: MyLog
+content: |
+  {% set entries = state_attr('sensor.mylog_recent_entries', 'entries') -%}
+  {% if entries -%}
+  {% for entry in entries[:5] -%}
+  {% set severity_icons = {'info': 'ℹ️', 'low': '🔵', 'medium': '🟡', 'high': '🟠', 'critical': '🔴'} -%}
+  {% set date = entry.occurred_at[:10] if entry.occurred_at else entry.created_at[:10] -%}
+  {% set time = entry.occurred_at[11:16] if entry.occurred_at else entry.created_at[11:16] -%}
+  {{ severity_icons.get(entry.severity, 'ℹ️') }} **{{ entry.title or 'Untitled' }}**
+  {% if entry.content -%}
+  {{ entry.content[:150] }}{% if entry.content | length > 150 %}…{% endif %}
+  {% endif -%}
+  *{{ entry.type }} · {{ date }} {{ time }}{% if entry.tags %} · {{ entry.tags | join(', ') }}{% endif %}*
+  {% if not loop.last -%}
+  ***
+  {% endif -%}
+  {% endfor -%}
+  {% else -%}
   No entries found.
   {% endif %}
 ```

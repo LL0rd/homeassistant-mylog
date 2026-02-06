@@ -42,7 +42,7 @@ class MyLogApi:
         """Return headers for API requests."""
         return {
             "Content-Type": "application/json",
-            "X-API-Key": self._api_key,
+            "Authorization": f"Bearer {self._api_key}",
         }
 
     async def health_check(self) -> dict[str, Any]:
