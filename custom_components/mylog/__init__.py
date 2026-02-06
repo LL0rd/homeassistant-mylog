@@ -11,6 +11,8 @@ from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import config_validation as cv
 
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+
 from .api import MyLogApi, MyLogConnectionError, MyLogApiError
 from .const import DOMAIN
 from .coordinator import MyLogCoordinator
@@ -57,12 +59,12 @@ SERVICE_SEND_BATCH_SCHEMA = vol.Schema(
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up MyLog from a config entry."""
-    api = MyLogApi(entry.data[CONF_API_KEY])
+    session = async_get_clientsession(hass)
+    api = MyLogApi(entry.data[CONF_API_KEY], session)
 
     try:
         await api.health_check()
     except MyLogConnectionError as err:
-        await api.close()
         raise ConfigEntryNotReady(f"Cannot connect to MyLog: {err}") from err
 
     coordinator = MyLogCoordinator(hass, api)
@@ -132,8 +134,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
     if unload_ok:
-        entry_data = hass.data[DOMAIN].pop(entry.entry_id)
-        await entry_data["api"].close()
+        hass.data[DOMAIN].pop(entry.entry_id)
 
         # Remove services if no more entries
         if not hass.data[DOMAIN]:

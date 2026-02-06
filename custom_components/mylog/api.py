@@ -30,12 +30,12 @@ class MyLogConnectionError(MyLogApiError):
 class MyLogApi:
     """Async client for MyLog API."""
 
-    def __init__(self, api_key: str) -> None:
+    def __init__(self, api_key: str, session: aiohttp.ClientSession) -> None:
         """Initialize the API client."""
         self._rust_api_url = RUST_API_URL
         self._nuxt_api_url = NUXT_API_URL
         self._api_key = api_key
-        self._session: aiohttp.ClientSession | None = None
+        self._session = session
 
     @property
     def _headers(self) -> dict[str, str]:
@@ -45,20 +45,9 @@ class MyLogApi:
             "X-API-Key": self._api_key,
         }
 
-    async def _get_session(self) -> aiohttp.ClientSession:
-        """Get or create an aiohttp session."""
-        if self._session is None or self._session.closed:
-            self._session = aiohttp.ClientSession()
-        return self._session
-
-    async def close(self) -> None:
-        """Close the aiohttp session."""
-        if self._session and not self._session.closed:
-            await self._session.close()
-
     async def health_check(self) -> dict[str, Any]:
         """Check API health."""
-        session = await self._get_session()
+        session = self._session
         try:
             async with session.get(
                 f"{self._rust_api_url}/health",
@@ -117,7 +106,7 @@ class MyLogApi:
             if v is not None
         }
 
-        session = await self._get_session()
+        session = self._session
         try:
             async with session.post(
                 f"{self._rust_api_url}/api/v1/logs",
@@ -142,7 +131,7 @@ class MyLogApi:
         self, entries: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Create multiple log entries in batch."""
-        session = await self._get_session()
+        session = self._session
         try:
             async with session.post(
                 f"{self._rust_api_url}/api/v1/logs/batch",
@@ -165,7 +154,7 @@ class MyLogApi:
 
     async def _nuxt_get(self, path: str, params: dict | None = None) -> Any:
         """Make a GET request to the Nuxt Web API."""
-        session = await self._get_session()
+        session = self._session
         try:
             async with session.get(
                 f"{self._nuxt_api_url}{path}",

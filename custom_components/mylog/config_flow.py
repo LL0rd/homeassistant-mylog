@@ -6,6 +6,7 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_API_KEY
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import MyLogApi, MyLogApiError, MyLogAuthError, MyLogConnectionError
 from .const import DOMAIN
@@ -32,7 +33,8 @@ class MyLogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self._abort_if_unique_id_configured()
 
                 # Test the API key
-                api = MyLogApi(api_key)
+                session = async_get_clientsession(self.hass)
+                api = MyLogApi(api_key, session)
                 try:
                     await api.health_check()
 
@@ -47,8 +49,6 @@ class MyLogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     errors["base"] = "cannot_connect"
                 except MyLogApiError:
                     errors["base"] = "unknown"
-                finally:
-                    await api.close()
 
         # Show the form
         return self.async_show_form(
@@ -81,7 +81,8 @@ class MyLogOptionsFlowHandler(config_entries.OptionsFlow):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            api = MyLogApi(self.config_entry.data[CONF_API_KEY])
+            session = async_get_clientsession(self.hass)
+            api = MyLogApi(self.config_entry.data[CONF_API_KEY], session)
             try:
                 await api.create_log_entry(
                     title=user_input.get("title", "Test from Home Assistant"),
@@ -96,8 +97,6 @@ class MyLogOptionsFlowHandler(config_entries.OptionsFlow):
                 errors["base"] = "invalid_auth"
             except MyLogApiError:
                 errors["base"] = "unknown"
-            finally:
-                await api.close()
 
         return self.async_show_form(
             step_id="init",
